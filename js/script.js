@@ -1,6 +1,9 @@
 const taskForm = document.getElementById("taskForm");
 const taskInput = document.getElementById("taskInput");
 const taskList = document.getElementById("taskList");
+const iconMoon = document.getElementById("icon-moon");
+const iconSun = document.getElementById("icon-sun");
+const toggleBtn = document.getElementById("toggleDark");
 
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 let currentFilter = localStorage.getItem("filter") || "all";
@@ -10,34 +13,43 @@ let editIndex = null;
 // DARK MODE (localStorage support)
 // ===============================
 
-const root = document.documentElement;
-const toggleDark = document.getElementById("toggleDark");
-const iconMoon = document.getElementById("icon-moon");
-const iconSun = document.getElementById("icon-sun");
-
+// Terapkan tema dari localStorage saat load halaman
 function applyTheme() {
-  const savedTheme = localStorage.getItem("theme");
+  const theme = localStorage.getItem("theme") || "light";
 
-  if (savedTheme === "dark") {
-    root.classList.add("dark");
-    iconMoon?.classList.add("hidden");
-    iconSun?.classList.remove("hidden");
+  if (theme === "dark") {
+    document.documentElement.classList.add("dark");
   } else {
-    root.classList.remove("dark");
-    iconMoon?.classList.remove("hidden");
-    iconSun?.classList.add("hidden");
+    document.documentElement.classList.remove("dark");
   }
+
+  updateThemeIcon();
 }
 
-toggleDark?.addEventListener("click", () => {
-  const isDark = root.classList.toggle("dark");
-  localStorage.setItem("theme", isDark ? "dark" : "light");
+// Perbarui ikon sesuai tema
+function updateThemeIcon() {
+  const isDark = document.documentElement.classList.contains("dark");
 
-  iconMoon?.classList.toggle("hidden", isDark);
-  iconSun?.classList.toggle("hidden", !isDark);
+  if (isDark) {
+    iconMoon.style.display = "none";
+    iconSun.style.display = "block";
+  } else {
+    iconMoon.style.display = "block";
+    iconSun.style.display = "none";
+  }
+
+  lucide.createIcons(); // Refresh icon
+}
+
+// Tombol toggle tema
+toggleBtn.addEventListener("click", () => {
+  const isDarkNow = document.documentElement.classList.toggle("dark");
+  localStorage.setItem("theme", isDarkNow ? "dark" : "light");
+  updateThemeIcon();
 });
 
-applyTheme();
+lucide.createIcons();
+applyTheme(); // panggil saat awal
 
 // ===============================
 // Tugas: Tambah / Edit / Simpan
@@ -142,7 +154,7 @@ function renderTasks() {
 function updateFilterUI() {
   document.querySelectorAll("[id^='filter']").forEach((btn) => {
     btn.setAttribute("aria-pressed", "false");
-    btn.classList.remove("bg-blue-100", "dark:bg-blue-700", "text-blue-800", "dark:text-white", "font-semibold", "ring");
+    btn.classList.remove("bg-blue-100", "dark:bg-blue-700", "text-blue-800", "font-semibold", "ring");
     btn.classList.add("bg-gray-200", "dark:bg-gray-600", "text-gray-800", "dark:text-white");
   });
 
@@ -177,7 +189,7 @@ document.getElementById("filterCompleted").addEventListener("click", () => {
 });
 
 // ===============================
-// Inisialisasi
+// Inisialisasi Awal
 // ===============================
 
 renderTasks();
